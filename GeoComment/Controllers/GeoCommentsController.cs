@@ -17,9 +17,7 @@ namespace GeoComment.Controllers
         {
 
             public string Message { get; set; }
-            [Required]
             public int Longitude { get; set; }
-            [Required]
             public int Latitude { get; set; }
             public string Author { get; set; }
         }
@@ -32,6 +30,7 @@ namespace GeoComment.Controllers
             public int Latitude { get; set; }
             public string Author { get; set; }
         }
+
 
         public GeoCommentsController(GeoCommetDBContext context)
         {
@@ -100,9 +99,15 @@ namespace GeoComment.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<PartiallyHiddenComment>>> GetComment(int minLon, int maxLon, int minLat,
-            int maxLat)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<IEnumerable<PartiallyHiddenComment>>> GetComment(int? minLon, int? maxLon, int? minLat,
+            int? maxLat)
         {
+            if (maxLat == null || minLat == null || maxLon == null || minLon == null )
+            {
+                return StatusCode(400);
+            }
+
             var comments = await _context.Comments
                 .Where(c => 
                     c.Longitude >= minLon &&
