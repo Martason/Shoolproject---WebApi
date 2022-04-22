@@ -84,6 +84,7 @@ namespace GeoComment.Controllers
                 Message = comment.Message,
                 Longitude = comment.Longitude,
                 Latitude = comment.Latitude,
+
                 // Email =
                 //     "xxxx@" +
                 //     user.Email.Split("@")[1],
@@ -93,6 +94,27 @@ namespace GeoComment.Controllers
             };
 
             return Ok(partiallyHiddenComment);
+        }
+
+        //[Route("{minLon:int},{maxLon:int},{minLat:int},{maxLat:int}")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<PartiallyHiddenComment>>> GetComment(int minLon, int maxLon, int minLat,
+            int maxLat)
+        {
+            var comments = await _context.Comments
+                .Where(c => 
+                    c.Longitude >= minLon &&
+                    c.Longitude <= maxLon &&
+                    c.Latitude >= minLat &&
+                    c.Latitude <= maxLat)
+                .ToListAsync();
+            
+            if (comments == null) return StatusCode(404);
+
+
+            return Ok(comments);
         }
 
 
