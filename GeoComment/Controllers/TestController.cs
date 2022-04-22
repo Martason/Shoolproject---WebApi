@@ -21,8 +21,9 @@ namespace GeoComment.Controllers
         [HttpGet]
         [Route("reset-db")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)] //TODO fråga björn
-        public async Task<ActionResult> ResetDatabase()
+        public async Task<IActionResult> ResetDatabase()
         {
             if (_environment.IsDevelopment())
                 try
@@ -36,7 +37,7 @@ namespace GeoComment.Controllers
                     return StatusCode(500);
                 }
 
-            return StatusCode(500);
+            return StatusCode(404);
         }
 
     }
