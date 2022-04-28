@@ -31,24 +31,24 @@ namespace GeoComment.Controllers
             public string Author { get; set; }
         }
 
-
         public GeoCommentsController(GeoCommetDBContext context)
         {
             _context = context;
         }
-
         [HttpPost]
+        [ApiVersion("0.1")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CreateComment(NewComment newComment)
         {
-            if (newComment == null) return BadRequest();
+            //TODO kan man hantera här så att message och author måste vara satta, not null, men long och lat är valfritt? 
+            if (newComment.Message == null || newComment.Author == null) return BadRequest();
 
             var comment = new Comment()
             {
                 Message = newComment.Message,
-                Longitude = newComment.Longitude,
+                Longitude = newComment.Longitude, //!= null ?? newComment.Longitude : null ,
                 Latitude = newComment.Latitude,
                 Author = newComment.Author,
                 Created = DateTime.UtcNow
@@ -68,6 +68,7 @@ namespace GeoComment.Controllers
         }
 
         [Route("{id:int}")]
+        [ApiVersion("0.1")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -97,6 +98,7 @@ namespace GeoComment.Controllers
 
         //[Route("{minLon:int},{maxLon:int},{minLat:int},{maxLat:int}")]
         [HttpGet]
+        [ApiVersion("0.1")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -116,6 +118,33 @@ namespace GeoComment.Controllers
                     c.Latitude <= maxLat)
                 .ToListAsync();
             
+            if (comments == null) return StatusCode(404);
+
+
+            return Ok(comments);
+        }
+
+        [HttpGet]
+        [ApiVersion("0.2")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<IEnumerable<PartiallyHiddenComment>>> GetCommentV0_2(int? minLon, int? maxLon, int? minLat,
+            int? maxLat)
+        {
+            if (maxLat == null || minLat == null || maxLon == null || minLon == null)
+            {
+                return StatusCode(400);
+            }
+
+            var comments = await _context.Comments
+                .Where(c =>
+                    c.Longitude >= minLon &&
+                    c.Longitude <= maxLon &&
+                    c.Latitude >= minLat &&
+                    c.Latitude <= maxLat)
+                .ToListAsync();
+
             if (comments == null) return StatusCode(404);
 
 

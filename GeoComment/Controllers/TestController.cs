@@ -19,10 +19,12 @@ namespace GeoComment.Controllers
         }
 
         [HttpGet]
-        [Route("reset-db")]
+        [Route("reset-db")]//detta heter operation del av open API
+        [ApiVersion("0.1")]
+        [ApiVersion("0.2")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)] //TODO fråga björn
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> ResetDatabase()
         {
             if (_environment.IsDevelopment())
