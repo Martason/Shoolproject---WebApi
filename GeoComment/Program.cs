@@ -1,7 +1,15 @@
+using System.Text;
+using GeoComment.Models;
+using GeoComment.Services;
 using GeoComment.Services.Data;
+using GeoComment.Swagger;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,9 +36,25 @@ builder.Services.AddSwaggerGen(options =>
         Title = "Versioning",
         Version = "v0.2"
     });
+
+    //Slipper lägga in versioner själv
+    options.OperationFilter<AddApiVersionExampleValueOperationFilter>();
+
+    //Lite oklart här
+    options.AddSecurityDefinition("BearerToken", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "JWT Authorization header using the Bearer scheme.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+    });
+
 }); 
 builder.Services.AddScoped<DatabaseHandler>();
-builder.Services.AddDbContext<GeoCommetDBContext>(
+builder.Services.AddScoped<JwtManager>();
+builder.Services.AddDbContext<GeoCommentDbContext>(
     options => options.UseSqlServer(
         builder.Configuration.GetConnectionString("default")));
 builder.Services.AddApiVersioning(options =>
@@ -41,6 +65,31 @@ builder.Services.AddApiVersioning(options =>
 
     options.ApiVersionReader = new QueryStringApiVersionReader("api-version");
 });
+// AddDefaultIdentity lägger till cockies som vi inte vill ha i detta projekt. 
+builder.Services.AddIdentityCore<User>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<GeoCommentDbContext>();
+
+// builder.Services.AddAuthentication("BasicAuthentication")
+//     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtConfig:Secret"]);
+
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true, // this will validate the 3rd part of the jwt token using the secret that we added in the appsettings and verify we have generated the jwt token
+            IssuerSigningKey = new SymmetricSecurityKey(key), // Add the secret key to our Jwt encryption
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            RequireExpirationTime = false,
+            ValidateLifetime = true,
+        };
+    });
 
 var app = builder.Build();
 
@@ -52,13 +101,15 @@ using (var scope = app.Services.CreateScope())
 
     if (app.Environment.IsDevelopment())
     {
-        await database.Recreate();
+        //await database.Recreate();
+        await database.CreateIfNotExist();
+        await database.SeedTestData();
+
     }
     if (app.Environment.IsProduction())
     {
         await database.CreateIfNotExist();
     }
-
 }
 
 if (app.Environment.IsDevelopment())
@@ -69,13 +120,16 @@ if (app.Environment.IsDevelopment())
     {
         options.SwaggerEndpoint($"/swagger/v0.1/swagger.json", "v0.1");
         options.SwaggerEndpoint($"/swagger/v0.2/swagger.json", "v0.2");
+
     }); 
 }
 
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 
