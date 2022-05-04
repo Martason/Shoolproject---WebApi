@@ -69,13 +69,6 @@ namespace GeoComment.Controllers
                 Message = comment.Message,
                 Longitude = comment.Longitude,
                 Latitude = comment.Latitude,
-
-                // Email =
-                //     "xxxx@" +
-                //     user.Email.Split("@")[1],
-                // CreditCardNumber =
-                //     user.CreditCardNumber.Substring(0, 5) +
-                //     "xxxx xxxx xxxx",
             };
 
             return Ok(returnComment);

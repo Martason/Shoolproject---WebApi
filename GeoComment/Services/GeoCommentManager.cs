@@ -48,5 +48,31 @@ namespace GeoComment.Services
             var comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id == id);
             return comment ?? null;
         }
+        public async Task<List<Comment?>> GetComment(string username)
+        {
+            var comment = await _context.Comments.Where(c => c.Author == username)
+                .ToListAsync();
+            
+            return comment ?? null;
+        }
+
+        
+        public async Task<List<Comment>> GetComment(double minLon, double maxLon, double minLat, double maxLat)
+        {
+            var comments = await _context.Comments
+                .Where(c =>
+                    c.Longitude >= minLon &&
+                    c.Longitude <= maxLon &&
+                    c.Latitude >= minLat &&
+                    c.Latitude <= maxLat)
+                .ToListAsync();
+            return comments;
+        }
+
+        public async Task<DtoResponseComment_v02> DeleteComment(string username)
+        {
+      
+            return null;
+        }
     }
 }

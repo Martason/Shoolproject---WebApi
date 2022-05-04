@@ -4,6 +4,7 @@ using GeoComment.Models;
 using GeoComment.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace GeoComment.Controllers
@@ -50,7 +51,7 @@ namespace GeoComment.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<DtoResponseComment_V01>> GetComment(int id)
+        public async Task<ActionResult<DtoResponseComment_v02>> GetComment(int id)
         {
             var comment = await _geoCommentManager.GetComment(id);
 
@@ -72,31 +73,78 @@ namespace GeoComment.Controllers
             return Ok(returnComment);
         }
 
-        [Route("{id:int}")]
+     
+        [HttpGet]
+        [Route("{username}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<DtoResponseComment_v02>>> GetComment(string username)
+        {
+            var comments = await _geoCommentManager.GetComment(username);
+
+            if (comments.Count == 0) return StatusCode(404);
+
+            var returnComments = new List<DtoResponseComment_v02>();
+            foreach (var comment in comments)
+            {
+                returnComments.Add(
+                    new DtoResponseComment_v02()
+                    {
+                        Id = comment.Id,
+                        Longitude = comment.Longitude,
+                        Latitude = comment.Latitude,
+                        Body = new()
+                        {
+                            Title = comment.Title,
+                            Message = comment.Message,
+                            Author = comment.Author
+                        }
+                    });
+
+            };
+
+            return Ok(returnComments);
+        }
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<DtoResponseComment_V01>> GetComment(string username)
+        public async Task<ActionResult<IEnumerable<DtoResponseComment_v02>>> GetComment([BindRequired] double minLon, [BindRequired] double maxLon, [BindRequired] double minLat,
+            [BindRequired] double maxLat)
         {
-            var comment = await _geoCommentManager.GetComment(id);
+            var comments =
+                await _geoCommentManager.GetComment(minLon, maxLon, minLat, maxLat);
 
-            if (comment == null) return StatusCode(404);
+            if (comments.Count == 0) return StatusCode(404);
 
-            var returnComment = new DtoResponseComment_v02()
+            var returnComments = new List<DtoResponseComment_v02>();
+            foreach (var comment in comments)
             {
-                Id = comment.Id,
-                Longitude = comment.Longitude,
-                Latitude = comment.Latitude,
-                Body = new()
-                {
-                    Title = comment.Title,
-                    Message = comment.Message,
-                    Author = comment.Author
-                }
+                returnComments.Add(
+                    new DtoResponseComment_v02()
+                    {
+                        Id = comment.Id,
+                        Longitude = comment.Longitude,
+                        Latitude = comment.Latitude,
+                        Body = new()
+                        {
+                            Title = comment.Title,
+                            Message = comment.Message,
+                            Author = comment.Author
+                        }
+                    });
+
             };
 
-            return Ok(returnComment);
+            return Ok(returnComments);
         }
+
+        [HttpDelete]
+        [Authorize]
+
+        
+
+
+
 
     }
 }
