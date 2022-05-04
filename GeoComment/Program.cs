@@ -12,34 +12,41 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
+#region Konfigurering
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
-//Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<DatabaseHandler>();
+builder.Services.AddScoped<GeoCommentManager>();
+builder.Services.AddScoped<GeoUserService>();
+builder.Services.AddScoped<JwtManager>();
+builder.Services.AddDbContext<GeoCommentDbContext>(
+    options => options.UseSqlServer(
+        builder.Configuration.GetConnectionString("default")));
+
+builder.Services.AddIdentityCore<User>()
+    .AddEntityFrameworkStores<GeoCommentDbContext>();
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(0, 1);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new QueryStringApiVersionReader("api-version");
+});
+
 builder.Services.AddVersionedApiExplorer(options =>
 {
     options.GroupNameFormat = "'v'VVV";
 });
-//skapar JSON och tittar på attributen och din kod och sparar dem som en stor sammling 
+
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v0.1", new OpenApiInfo
-    {
-        Title = "Versioning",
-        Version = "v0.1"
-    });
-    options.SwaggerDoc("v0.2", new OpenApiInfo
-    {
-        Title = "Versioning",
-        Version = "v0.2"
-    });
-
-    //Slipper lägga in versioner själv
-    options.OperationFilter<AddApiVersionExampleValueOperationFilter>();
-
     //Lite oklart här
     options.AddSecurityDefinition("BearerToken", new OpenApiSecurityScheme
     {
@@ -51,35 +58,28 @@ builder.Services.AddSwaggerGen(options =>
         In = ParameterLocation.Header,
     });
 
+    //Slipper lägga in versioner själv
+    options.OperationFilter<AddApiVersionExampleValueOperationFilter>();
+
+    options.SwaggerDoc("v0.1", new OpenApiInfo
+    {
+        Title = "Versioning",
+        Version = "v0.1"
+    });
+    options.SwaggerDoc("v0.2", new OpenApiInfo
+    {
+        Title = "Versioning",
+        Version = "v0.2"
+    });
+
 }); 
-builder.Services.AddScoped<DatabaseHandler>();
-builder.Services.AddScoped<JwtManager>();
-builder.Services.AddDbContext<GeoCommentDbContext>(
-    options => options.UseSqlServer(
-        builder.Configuration.GetConnectionString("default")));
-builder.Services.AddApiVersioning(options =>
-{
-    options.DefaultApiVersion = new ApiVersion(0, 1);
-    options.AssumeDefaultVersionWhenUnspecified = true;
-    options.ReportApiVersions = true;
-
-    options.ApiVersionReader = new QueryStringApiVersionReader("api-version");
-});
-// AddDefaultIdentity lägger till cockies som vi inte vill ha i detta projekt. 
-builder.Services.AddIdentityCore<User>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<GeoCommentDbContext>();
-
-// builder.Services.AddAuthentication("BasicAuthentication")
-//     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
-
-
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtConfig:Secret"]);
 
-        options.SaveToken = true;
+        //options.SaveToken = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true, // this will validate the 3rd part of the jwt token using the secret that we added in the appsettings and verify we have generated the jwt token
@@ -90,6 +90,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
         };
     });
+
+#endregion
+
+#region Middleware Pipelining
 
 var app = builder.Build();
 
@@ -130,7 +134,10 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-
 app.MapControllers();
 
+#endregion
+
+#region Server start
 app.Run();
+#endregion

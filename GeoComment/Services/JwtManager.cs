@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace GeoComment.Services
 {
+    //Behövs för VG
     public class JwtManager
     {
         private readonly IConfiguration _configuration;
@@ -30,6 +31,7 @@ namespace GeoComment.Services
                 // Hur länge token ska vara giltlig
                 Expires = DateTime.UtcNow.AddHours(6),
                 // Den hemliga nyckeln och vilken typ av kryptering som används
+                //TODO hur spelar JwtConfig:Secret in här? 
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512Signature)
             };
 

@@ -1,6 +1,6 @@
 ﻿namespace GeoComment.Models
 {
-    public class NewCommentDto
+    public class DtoNewCommen_v01
     {
         public string Message { get; set; }
         public double Longitude { get; set; }

@@ -14,12 +14,12 @@ namespace GeoComment.Controllers
     [ApiController]
     [ApiVersion("0.1")]
 
-    public class GeoCommentsController_v0_1 : ControllerBase
+    public class GeoCommentsControllerV01 : ControllerBase
     {
 
         private readonly GeoCommentDbContext _context;
  
-        public GeoCommentsController_v0_1(GeoCommentDbContext context)
+        public GeoCommentsControllerV01(GeoCommentDbContext context)
         {
             _context = context;
         }
@@ -28,9 +28,8 @@ namespace GeoComment.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> CreateComment(NewCommentDto newComment)
+        public async Task<IActionResult> CreateComment(DtoNewCommen_v01 newComment)
         {
-            //TODO kan man hantera här så att message och author måste vara satta, not null, men long och lat är valfritt? 
             var comment = new Comment()
             {
                 Message = newComment.Message,
@@ -56,15 +55,14 @@ namespace GeoComment.Controllers
 
         [Route("{id:int}")]
         [HttpGet]
-        //[Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<PartiallyHiddenCommentDto>> GetComment(int id)
+        public async Task<ActionResult<DtoResponseComment_V01>> GetComment(int id)
         {
             var comment = await _context.Comments.FirstOrDefaultAsync(c => c.Id == id);
             if (comment == null) return StatusCode(404);
 
-            var partiallyHiddenComment = new PartiallyHiddenCommentDto()
+            var returnComment = new DtoResponseComment_V01()
             {
                 Id = comment.Id,
                 Author = comment.Author,
@@ -80,14 +78,14 @@ namespace GeoComment.Controllers
                 //     "xxxx xxxx xxxx",
             };
 
-            return Ok(partiallyHiddenComment);
+            return Ok(returnComment);
         }
 
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<IEnumerable<PartiallyHiddenCommentDto>>> GetComment([BindRequired]double minLon, [BindRequired] double maxLon, [BindRequired] double minLat,
+        public async Task<ActionResult<IEnumerable<DtoResponseComment_V01>>> GetComment([BindRequired]double minLon, [BindRequired] double maxLon, [BindRequired] double minLat,
             [BindRequired] double maxLat)
         {
             

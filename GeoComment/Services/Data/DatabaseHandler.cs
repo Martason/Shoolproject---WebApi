@@ -22,19 +22,17 @@ namespace GeoComment.Services.Data
             };
 
             await _userManager.CreateAsync(user, "Passw0rd!");
-
-
         }
         public async Task Recreate()
         {
             await _context.Database.EnsureDeletedAsync();
             await _context.Database.EnsureCreatedAsync();
         }
+
         public async Task CreateIfNotExist()
         {
             await _context.Database.EnsureCreatedAsync();
         }
-
 
 
     }

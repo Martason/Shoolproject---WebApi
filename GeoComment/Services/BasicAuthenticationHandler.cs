@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace GeoComment.Services
 {
+    // Behövs för G
     // Källa för kod:
     // https://jasonwatmore.com/post/2019/10/21/aspnet-core-3-basic-authentication-tutorial-with-example-api
     public class BasicAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
