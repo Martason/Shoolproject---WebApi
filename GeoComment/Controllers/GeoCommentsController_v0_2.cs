@@ -1,4 +1,5 @@
 ﻿
+using System.Runtime.InteropServices;
 using GeoComment.DTO;
 using GeoComment.Models;
 using GeoComment.Services;
@@ -107,6 +108,7 @@ namespace GeoComment.Controllers
         }
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<DtoResponseComment_v02>>> GetComment([BindRequired] double minLon, [BindRequired] double maxLon, [BindRequired] double minLat,
             [BindRequired] double maxLat)
@@ -140,6 +142,14 @@ namespace GeoComment.Controllers
 
         [HttpDelete]
         [Authorize]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> DeleteComment([BindRequired] int id)
+        {
+            var commentToDelete = await _geoCommentManager.GetComment(id);
+            if (commentToDelete == null) return StatusCode(404);
+            return null;
+
+        }
 
         
 

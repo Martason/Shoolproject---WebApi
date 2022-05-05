@@ -48,7 +48,7 @@ builder.Services.AddVersionedApiExplorer(options =>
 builder.Services.AddSwaggerGen(options =>
 {
     //Lite oklart här
-    options.AddSecurityDefinition("BearerToken", new OpenApiSecurityScheme
+    options.AddSecurityDefinition("JwtAuth", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.Http,
         Scheme = "bearer",
@@ -60,6 +60,7 @@ builder.Services.AddSwaggerGen(options =>
 
     //Slipper lägga in versioner själv
     options.OperationFilter<AddApiVersionExampleValueOperationFilter>();
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
 
     options.SwaggerDoc("v0.1", new OpenApiInfo
     {

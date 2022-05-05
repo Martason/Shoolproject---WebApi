@@ -1,6 +1,7 @@
 ﻿using GeoComment.DTO;
 using GeoComment.Models;
 using GeoComment.Services.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GeoComment.Services
@@ -8,18 +9,20 @@ namespace GeoComment.Services
     public class GeoCommentManager
     {
         private readonly GeoCommentDbContext _context;
-        private readonly JwtManager _jwtManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        public readonly UserManager<User> _userManager;
 
-        public GeoCommentManager(GeoCommentDbContext context, JwtManager jwtManager, IHttpContextAccessor httpContextAccessor)
+        public GeoCommentManager(GeoCommentDbContext context, IHttpContextAccessor httpContextAccessor, UserManager<User> userManager)
         {
             _context = context;
-            _jwtManager = jwtManager;
             _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
         public async Task<Comment?> CreateComment(DtoNewComment_v02 newComment)
         {
+
+            //TODO måste lägga till en user istället för string på authour
             var comment = new Comment()
             {
                 Message = newComment.Body.Message,
@@ -69,9 +72,11 @@ namespace GeoComment.Services
             return comments;
         }
 
-        public async Task<DtoResponseComment_v02> DeleteComment(string username)
+        public async Task<DtoResponseComment_v02> DeleteComment(Comment comment)
         {
-      
+          //  var userToLogin = await _userManager.FindByNameAsync(user.UserName);
+          //  if (userToLogin == null) return null;
+
             return null;
         }
     }
