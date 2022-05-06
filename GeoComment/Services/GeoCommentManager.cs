@@ -18,7 +18,7 @@ namespace GeoComment.Services
           
         }
         /// <summary>
-        /// Saves the provided comment in the database
+        /// Saves the provided  <paramref name="comment"/> in the database
         /// </summary>
         /// <param name="comment"></param>
         /// <returns>The saved comment</returns>
@@ -30,7 +30,7 @@ namespace GeoComment.Services
         }
 
         /// <summary>
-        /// Gets the comment that matches with provided id from the database
+        /// Gets the comment that matches the provided <paramref name="id"/> from the database
         /// </summary>
         /// <param name="id"></param>
         /// <returns>The comment that matches if successful or null</returns>
@@ -41,7 +41,7 @@ namespace GeoComment.Services
         }
 
         /// <summary>
-        /// Gets a list with comment that matches with provided username from the database
+        /// Gets a list with comment that matches with provided  <paramref name="username"/> from the database
         /// </summary>
         /// <param name="id"></param>
         /// <returns>List containing matching comments</returns>
@@ -75,7 +75,7 @@ namespace GeoComment.Services
         }
 
         /// <summary>
-        /// Deletes the provided comment if the provided user is the author.
+        /// Deletes the provided <paramref name="comment"/> from the database if the provided <paramref name="user"/> is the author of the <paramref name="comment"/>.
         /// </summary>
         /// <param name="comment"></param>
         /// <param name="user"></param>
