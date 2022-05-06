@@ -75,20 +75,8 @@ namespace GeoComment.Controllers
                 var comment = await _geoCommentManager.CreateComment(newComment);
                 if (comment == null) return BadRequest();
 
-                //TODO flytta bort detta
 
-                var returnComment = new DtoResponseComment_V01()
-                {
-                    Id = comment.Id,
-                    Longitude = comment.Longitude,
-                    Latitude = comment.Latitude,
-                    Body = new()
-                    {
-                        Title = comment.Title,
-                        Message = comment.Message,
-                        Author = comment.Author
-                    }
-                };
+                var returnComment = DtoResponseComment_v02.CreateResponseComment_v02(comment);
 
                 return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, returnComment);
 
@@ -110,19 +98,8 @@ namespace GeoComment.Controllers
 
             if (comment == null) return StatusCode(404);
 
-            var returnComment = new DtoResponseComment_v02()
-            {
-                Id = comment.Id,
-                Longitude = comment.Longitude,
-                Latitude = comment.Latitude,
-                Body = new () 
-                {
-                    Title = comment.Title,
-                    Message = comment.Message,
-                    Author = comment.Author
-                }
-            };
-
+            var returnComment = DtoResponseComment_v02.CreateResponseComment_v02(comment);
+            
             return Ok(returnComment);
         }
 
@@ -138,21 +115,11 @@ namespace GeoComment.Controllers
             if (comments.Count == 0) return StatusCode(404);
 
             var returnComments = new List<DtoResponseComment_v02>();
+
             foreach (var comment in comments)
             {
-                returnComments.Add(
-                    new DtoResponseComment_v02()
-                    {
-                        Id = comment.Id,
-                        Longitude = comment.Longitude,
-                        Latitude = comment.Latitude,
-                        Body = new()
-                        {
-                            Title = comment.Title,
-                            Message = comment.Message,
-                            Author = comment.Author
-                        }
-                    });
+                var returnComment = DtoResponseComment_v02.CreateResponseComment_v02(comment);
+                returnComments.Add(returnComment);
 
             };
 
@@ -173,20 +140,10 @@ namespace GeoComment.Controllers
             var returnComments = new List<DtoResponseComment_v02>();
             foreach (var comment in comments)
             {
-                returnComments.Add(
-                    new DtoResponseComment_v02()
-                    {
-                        Id = comment.Id,
-                        Longitude = comment.Longitude,
-                        Latitude = comment.Latitude,
-                        Body = new ()
-                        {
-                            Title = comment.Title,
-                            Message = comment.Message,
-                            Author = comment.Author
-                        }
-                    });
 
+                var returnComment = DtoResponseComment_v02.CreateResponseComment_v02(comment);
+
+                returnComments.Add(returnComment);
             };
 
             return Ok(returnComments);
@@ -216,27 +173,15 @@ namespace GeoComment.Controllers
             {
                 var deletedComment = await _geoCommentManager.DeleteComment(commentToDelete, user);
                 if (deletedComment == null) return StatusCode(401);
-                var responseComment = new DtoResponseComment_v02()
-                {
-                    Id = deletedComment.Id,
-                    Longitude = deletedComment.Longitude,
-                    Latitude = deletedComment.Latitude,
-                    Body = new()
-                    {
-                        Title = deletedComment.Title,
-                        Message = deletedComment.Message,
-                        Author = deletedComment.Author,
-                    }
-                };
 
-                return Ok(responseComment);
+                var returnComment = DtoResponseComment_v02.CreateResponseComment_v02(deletedComment);
+
+                return Ok(returnComment);
             }
             catch
             {
                 return StatusCode(500);
             }
-
-            
 
         }
 
