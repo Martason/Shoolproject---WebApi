@@ -7,6 +7,7 @@ using GeoComment.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
 namespace GeoComment.Controllers
@@ -31,34 +32,16 @@ namespace GeoComment.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> CreateComment(DtoCommentInputV02 commentInput)
         {
-            /*
-             * The following example extracts the claims presented by a user in an HTTP request and writes them
-             * to the HTTP response. The current user is read from the HttpContext as a ClaimsPrincipal.
-             * The claims are then read from it and then are written to the response.
-             *
-             * ClaimsPrincipal exposes a collection of identities, each of which is a ClaimsIdentity.
-             * In the common case, this collection, which is accessed through the Identities property,
-             * will only have a single element.
-             *
-             * ClaimTypes.Name is for username and ClaimTypes.NameIdentifier specifies identity of
-             * the user as object perspective. If you add them in a kind of ClaimIdentity object that
-             * provides you to reach User.Identity methods(for example in the dotnet world) which are
-             * GetUserName() and GetUserId().
-             */
-
-            //var username = _httpContextAccessor.HttpContext.User.Identity.Name;
 
             var principal = HttpContext.User;
             var userId = principal.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-            //var username = principal.FindFirst(c => c.Type == ClaimTypes.Name).Value;
 
             var user = await _geoUserService.GetUser(userId);
             if (user == null) return Unauthorized();
 
             try
             {
-                var newComment = new Comment()
+                var newComment = new Comment
                 {
                     Message = commentInput.Body.Message,
                     Longitude = commentInput.Longitude,
@@ -69,7 +52,6 @@ namespace GeoComment.Controllers
                     Title = commentInput.Body.Title != null
                         ? commentInput.Body.Title
                         : commentInput.Body.Message.Split(" ")[0]
-
                 };
 
                 var comment = await _geoCommentManager.CreateComment(newComment);
@@ -78,14 +60,12 @@ namespace GeoComment.Controllers
 
                 var returnComment = DtoResponseComment_v02.CreateResponseComment_v02(comment);
 
-                return CreatedAtAction(nameof(GetComment), new { id = comment.Id }, returnComment);
-
+                return CreatedAtAction(nameof(GetComment), new {id = comment.Id}, returnComment);
             }
-            catch (Exception)
+            catch (DbUpdateException)
             {
                 return StatusCode(500);
             }
-            
         }
 
         [Route("{id:int}")]
@@ -114,14 +94,7 @@ namespace GeoComment.Controllers
 
             if (comments.Count == 0) return StatusCode(404);
 
-            var returnComments = new List<DtoResponseComment_v02>();
-
-            foreach (var comment in comments)
-            {
-                var returnComment = DtoResponseComment_v02.CreateResponseComment_v02(comment);
-                returnComments.Add(returnComment);
-
-            };
+            var returnComments = comments.Select(DtoResponseComment_v02.CreateResponseComment_v02).ToList();
 
             return Ok(returnComments);
         }
@@ -129,7 +102,7 @@ namespace GeoComment.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<DtoResponseComment_v02>>> GetComment([BindRequired] double minLon, [BindRequired] double maxLon, [BindRequired] double minLat,
+        public async Task<ActionResult<IEnumerable<DtoResponseComment_v02>>> GetCommentAsync([BindRequired] double minLon, [BindRequired] double maxLon, [BindRequired] double minLat,
             [BindRequired] double maxLat)
         {
             var comments =
@@ -137,14 +110,7 @@ namespace GeoComment.Controllers
 
             if (comments.Count == 0) return StatusCode(404);
 
-            var returnComments = new List<DtoResponseComment_v02>();
-            foreach (var comment in comments)
-            {
-
-                var returnComment = DtoResponseComment_v02.CreateResponseComment_v02(comment);
-
-                returnComments.Add(returnComment);
-            };
+            var returnComments = comments.Select(DtoResponseComment_v02.CreateResponseComment_v02).ToList();
 
             return Ok(returnComments);
         }
@@ -167,7 +133,7 @@ namespace GeoComment.Controllers
             if (user == null) return Unauthorized();
 
 
-            //enligt cleanCode lägg detta i en egen metod kap. 7 sid 105
+            //cleanCode kap. 7 sid 105
 
             try
             {
@@ -178,7 +144,7 @@ namespace GeoComment.Controllers
 
                 return Ok(returnComment);
             }
-            catch
+            catch(DbUpdateException)
             {
                 return StatusCode(500);
             }
