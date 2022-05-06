@@ -19,8 +19,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddHttpContextAccessor();
-
 builder.Services.AddScoped<DatabaseHandler>();
 builder.Services.AddScoped<GeoCommentManager>();
 builder.Services.AddScoped<GeoUserService>();
@@ -79,8 +77,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         var key = Encoding.ASCII.GetBytes(builder.Configuration["JwtConfig:Secret"]);
-
-        //options.SaveToken = true;
+        //TODO fråga björn
+        options.SaveToken = true;
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true, // this will validate the 3rd part of the jwt token using the secret that we added in the appsettings and verify we have generated the jwt token

@@ -16,6 +16,8 @@ namespace GeoComment.Services
             _configuration = configuration;
         }
 
+        //
+
         public string GenerateJwtToken(User user)
         {
             var key = Encoding.ASCII.GetBytes(_configuration["JwtConfig:Secret"]);

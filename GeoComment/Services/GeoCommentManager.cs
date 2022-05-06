@@ -8,41 +8,27 @@ namespace GeoComment.Services
 {
     public class GeoCommentManager
     {
+        //TODO endast hantering av comment! Ta bort bort Dto hantering här
+
         private readonly GeoCommentDbContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         public readonly UserManager<User> _userManager;
 
-        public GeoCommentManager(GeoCommentDbContext context, IHttpContextAccessor httpContextAccessor, UserManager<User> userManager)
+        public GeoCommentManager(GeoCommentDbContext context, UserManager<User> userManager)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
         }
 
-        public async Task<Comment?> CreateComment(DtoNewComment_v02 newComment)
+        public async Task<Comment?> CreateComment(Comment comment)
         {
 
-            //TODO måste lägga till en user istället för string på authour
-            var comment = new Comment()
-            {
-                Message = newComment.Body.Message,
-                Longitude = newComment.Longitude,
-                Latitude = newComment.Latitude,
-                Author = _httpContextAccessor.HttpContext.User.Identity.Name,
-                Created = DateTime.UtcNow,
-                Title = newComment.Body.Title != null ? newComment.Body.Title : newComment.Body.Message.Split(" ")[0]
-            };
+            // Inte använda httpContextAccessor
+            // Och ta in username i metoden. 
 
-            try
-            {
-                await _context.AddAsync(comment);
+            await _context.AddAsync(comment);
                 await _context.SaveChangesAsync();
                 return comment;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+
 
         }
 
@@ -72,12 +58,27 @@ namespace GeoComment.Services
             return comments;
         }
 
-        public async Task<DtoResponseComment_v02> DeleteComment(Comment comment)
+        public async Task<Comment?> DeleteComment(Comment comment, User user)
         {
-          //  var userToLogin = await _userManager.FindByNameAsync(user.UserName);
-          //  if (userToLogin == null) return null;
+            var userIsCommentAuthor = comment.Author == user.UserName;
 
-            return null;
+            if (!userIsCommentAuthor) return null;
+            
+            var copyDeletedComment = new Comment()
+            {
+                Id = comment.Id,
+                Longitude = comment.Longitude,
+                Latitude = comment.Latitude,
+                Title = comment.Title,
+                Message = comment.Message,
+                Author = comment.Author,
+                User = null
+            };
+
+            _context.Remove(comment);
+            await _context.SaveChangesAsync();
+
+            return copyDeletedComment;
         }
     }
 }

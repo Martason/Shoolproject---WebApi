@@ -38,5 +38,11 @@ namespace GeoComment.Services
             var passWordCheck = await _userManager.CheckPasswordAsync(userToLogin, user.Password);
             return passWordCheck ? _jwtManager.GenerateJwtToken(userToLogin) : null;
         }
+
+        public async Task<User?> GetUser(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            return user ?? null;
+        }
     }
 }
