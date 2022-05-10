@@ -17,7 +17,7 @@ namespace GeoComment.Services
             _jwtManager = jwtManager;
         }
 
-        public async Task<User?> RegisterNewUser(NewUserDto user)
+        public async Task<User?> RegisterNewUser(DtoNewUserInputDto user)
         {
             var newUser = new User
             {
@@ -30,7 +30,7 @@ namespace GeoComment.Services
         }
 
 
-        public async Task<string?> Login(NewUserDto user)
+        public async Task<string?> Login(DtoNewUserInputDto user)
         {
             var userToLogin = await _userManager.FindByNameAsync(user.UserName);
             if (userToLogin == null) return null;

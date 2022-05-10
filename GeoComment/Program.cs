@@ -104,7 +104,6 @@ using (var scope = app.Services.CreateScope())
 
     if (app.Environment.IsDevelopment())
     {
-        //await database.Recreate();
         await database.CreateIfNotExist();
         await database.SeedTestData();
 
@@ -117,8 +116,7 @@ using (var scope = app.Services.CreateScope())
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(); // gör att man får tag i de jason obkj man använt för att beskriva sin web api
-    //lägger till en visuell representation av din api. 
+    app.UseSwagger(); 
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint($"/swagger/v0.1/swagger.json", "v0.1");

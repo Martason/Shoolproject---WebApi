@@ -1,6 +1,6 @@
 ﻿namespace GeoComment.DTO
 {
-    public class ResponseUser
+    public class DtoResponseUser
     {
         public string Id { get; set; }
         public string Username { get; set; }

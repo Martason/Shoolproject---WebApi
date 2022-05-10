@@ -132,9 +132,6 @@ namespace GeoComment.Controllers
             var user = await _geoUserService.GetUser(userId);
             if (user == null) return Unauthorized();
 
-
-            //cleanCode kap. 7 sid 105
-
             try
             {
                 var deletedComment = await _geoCommentManager.DeleteComment(commentToDelete, user);
@@ -144,11 +141,10 @@ namespace GeoComment.Controllers
 
                 return Ok(returnComment);
             }
-            catch(DbUpdateException)
+            catch (DbUpdateException)
             {
                 return StatusCode(500);
             }
-
         }
 
         

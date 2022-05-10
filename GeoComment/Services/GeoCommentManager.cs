@@ -22,6 +22,7 @@ namespace GeoComment.Services
         /// </summary>
         /// <param name="comment"></param>
         /// <returns>The saved comment</returns>
+        /// <exception cref="DbUpdateException"></exception>
         public async Task<Comment?> CreateComment(Comment comment)
         {
             await _context.AddAsync(comment);
@@ -80,6 +81,7 @@ namespace GeoComment.Services
         /// <param name="comment"></param>
         /// <param name="user"></param>
         /// <returns>The deleted comment if successful or null</returns>
+        /// <exception cref="DbUpdateException"></exception>
         public async Task<Comment?> DeleteComment(Comment comment, User user)
         {
             var userIsCommentAuthor = comment.Author == user.UserName;

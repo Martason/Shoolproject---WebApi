@@ -24,13 +24,13 @@ namespace GeoComment.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<ResponseUser>> RegisterUser(NewUserDto newUser)
+        public async Task<ActionResult<DtoResponseUser>> RegisterUser(DtoNewUserInputDto newUser)
         {
             var user = await _geoUserService.RegisterNewUser(newUser);
 
             if (user == null) return BadRequest();
 
-            var responseUser = new ResponseUser
+            var responseUser = new DtoResponseUser
             {
                 Id = user.Id,
                 Username = user.UserName
@@ -44,7 +44,7 @@ namespace GeoComment.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult> Login(NewUserDto userToLogin)
+        public async Task<ActionResult> Login(DtoNewUserInputDto userToLogin)
         {
             var tokenStr = await _geoUserService.Login(userToLogin);
             if (tokenStr == null) return BadRequest();

@@ -28,7 +28,7 @@ namespace GeoComment.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> CreateComment(DtoNewCommentV01 newComment)
+        public async Task<IActionResult> CreateComment(DtoCommentInputV01 newComment)
         {
             var comment = new Comment()
             {
